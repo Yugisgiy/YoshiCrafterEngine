@@ -223,12 +223,14 @@ class PauseSubState extends MusicBeatSubstate
 								PlayState.current.endSong();
 							}
 						});
+                                                #if desktop
 						controlsList.push({
 							label: 'Logs (F6)',
 							callback: function(t) {
 								Main.logsOverlay.visible = !Main.logsOverlay.visible;
 							}
 						});
+                                                #end
 						controlsList.push({
 							label: 'Edit Player',
 							callback: function(t) {

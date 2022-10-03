@@ -14,13 +14,13 @@ class BlammedShader extends FlxFixedShader {
             if (enabled) {
                 vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
                 float alpha = color.a;
-                if (alpha == 0) {
-                    gl_FragColor = vec4(0, 0, 0, alpha);
+                if (alpha == 0.0) {
+                    gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
                 } else {
-                    float average = ((color.r + color.g + color.b) / 3) * 255;
-                    float finalColor = (50 - average) / 50;
-                    if (finalColor < 0) finalColor = 0;
-                    if (finalColor > 1) finalColor = 1;
+                    float average = ((color.r + color.g + color.b) / 3.0) * 255.0;
+                    float finalColor = (50.0 - average) / 50.0;
+                    if (finalColor < 0.0) finalColor = 0.0;
+                    if (finalColor > 1.0) finalColor = 1.0;
                     
                     gl_FragColor = vec4(finalColor * r * alpha, finalColor * g * alpha, finalColor * b * alpha, alpha);
                 }
@@ -30,16 +30,16 @@ class BlammedShader extends FlxFixedShader {
             }
         }
     ')
-    public function new(r:Int, g:Int, b:Int) {
+    public function new(r:Float, g:Float, b:Float) {
         super();
         setColors(r, g, b);
         this.enabled.value = [true];
     }
 
-    public function setColors(r:Int, g:Int, b:Int) {
-        this.r.value = [r / 255];
-        this.g.value = [g / 255];
-        this.b.value = [b / 255];
+    public function setColors(r:Float, g:Float, b:Float) {
+        this.r.value = [r / 255.0];
+        this.g.value = [g / 255.0];
+        this.b.value = [b / 255.0];
     }
 }
 
@@ -79,17 +79,17 @@ class ColorShader extends FlxFixedShader {
             }
         }
     ')
-    public function new(r:Int, g:Int, b:Int, addR:Int, addG:Int, addB:Int) {
+    public function new(r:Float, g:Float, b:Float, addR:Float, addG:Float, addB:Float) {
         super();
         setColors(r, g, b, addR, addG, addB);
     }
 
-    public function setColors(r:Int, g:Int, b:Int, addR:Int, addG:Int, addB:Int) {
-        this.r.value = [r / 255];
-        this.g.value = [g / 255];
-        this.b.value = [b / 255];
-        this.addR.value = [addR / 255];
-        this.addG.value = [addG / 255];
-        this.addB.value = [addB / 255];
+    public function setColors(r:Float, g:Float, b:Float, addR:Float, addG:Float, addB:Float) {
+        this.r.value = [r / 255.0];
+        this.g.value = [g / 255.0];
+        this.b.value = [b / 255.0];
+        this.addR.value = [addR / 255.0];
+        this.addG.value = [addG / 255.0];
+        this.addB.value = [addB / 255.0];
     }
 }

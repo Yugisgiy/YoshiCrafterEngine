@@ -11,8 +11,9 @@ import haxe.Json;
 import haxe.Http;
 #if desktop
 import Discord.DiscordClient;
-import sys.thread.Thread;
 #end
+// THREAD WORKS ON ANDROID
+import sys.thread.Thread;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;

@@ -2,8 +2,10 @@ import haxe.crypto.Md5;
 import Medals.MedalsJSON;
 import haxe.Exception;
 import flixel.addons.display.FlxBackdrop;
+#if desktop
 import discord_rpc.DiscordRpc;
 import Discord.DiscordClient;
+#end
 import openfl.display.BlendMode;
 import flixel.tile.FlxTilemap;
 import animateatlas.AtlasFrameMaker;
@@ -16,7 +18,8 @@ import openfl.utils.AssetManifest;
 import haxe.io.Path;
 import haxe.io.Bytes;
 import Shaders.ColorShader;
-#if desktop
+#if (desktop || android)
+// (sirox) dumb, this works on android
 import cpp.Lib;
 #end
 import flixel.util.FlxSave;
@@ -99,7 +102,7 @@ class ModSupport {
         // DiscordClient.currentButton2Label = "Download Mod (Alt Link)";
         // DiscordClient.currentButton2Url = (mod.downloadLinkAlt != null && mod.downloadLinkAlt.trim() != "") ? mod.downloadLinkAlt : null;
         // DiscordClient.switchRPC(discordRpc);
-
+        #if desktop
         if (!DiscordClient.init) {
             trace("Discord not init yet");
             return;
@@ -115,6 +118,7 @@ class ModSupport {
         DiscordClient.currentButton2Url = (mod.downloadLinkAlt != null && mod.downloadLinkAlt.trim() != "") ? mod.downloadLinkAlt : null;
         
         DiscordClient.switchRPC(discordRpc);
+        #end
     }
     public static function getMods():Array<String> {
         var modFolder = Paths.modsPath;
@@ -130,10 +134,10 @@ class ModSupport {
         for(f in FileSystem.readDirectory('$rootPath$path')) {
             if (FileSystem.isDirectory('$rootPath$path$f')) {
                 // fuck you git
-                if (f.toLowerCase() != ".git")
+                if (Paths.matchPath(f, function(str:String) { return str != ".git"; }))
                     getAssetFiles(assets, rootPath, '$path$f/', libraryName);
             } else {
-                var type = "BINARY";
+                var type:String = "BINARY";
                 var useExt:Bool = true;
                 switch(Path.extension(f).toLowerCase()) {
                     case "txt" | "xml" | "json" | "hx" | "hscript" | "hsc" | "lua" | "frag" | "vert":
@@ -147,7 +151,7 @@ class ModSupport {
                         useExt = false;
 
                 }
-                var stat = FileSystem.stat('$rootPath$path$f');
+                var stat:sys.FileStat = FileSystem.stat('$rootPath$path$f');
                 assets.push({
                     type: type,
                     id: ('assets/$libraryName/$prefix$path${useExt ? f : Path.withoutExtension(f)}').toLowerCase(), // for case sensitive shit & correct linux support
@@ -175,7 +179,7 @@ class ModSupport {
 			var fullTitle = false;
 			for (t in fullTitleThingies)
 			{
-				if (mod.toLowerCase().contains(t))
+				if (Paths.matchPath(mod, function(str:String) { return str.contains(t); }))
 				{
 					fullTitle = true;
 					break;
@@ -220,6 +224,7 @@ class ModSupport {
     }
     public static function reloadModsConfig(reloadAll:Bool = false, reloadSkins:Bool = true, clearCache:Bool = false, reloadCurrent:Bool = false):Bool {
         if (clearCache) {
+            lime.app.Application.current.window.alert("clearing cache", "TRACE");
             Assets.cache.clear();
             openfl.utils.Assets.cache.clear();
             // long ass reset but you cant stop me haha
@@ -235,28 +240,40 @@ class ModSupport {
             PlayState.blueballAmount = 0;
             PlayState.fromCharter = false;
             PlayState.songMod = "Friday Night Funkin'";
+            lime.app.Application.current.window.alert("cleared cache", "TRACE");
         }
 
         if (reloadSkins) {
             // skins shit
-            
+            lime.app.Application.current.window.alert("loading skins", "TRACE");
             var assets:AssetManifest = new AssetManifest();
             assets.name = "skins";// for case sensitive shit & correct linux support
-            assets.libraryType = null;
-            assets.version = 2;
-            assets.libraryArgs = [];
-            assets.assets = [];
+            lime.app.Application.current.window.alert("created ass library", "TRACE");
             FileSystem.createDirectory('${Paths.getSkinsPath()}/bf/');
             FileSystem.createDirectory('${Paths.getSkinsPath()}/gf/');
             FileSystem.createDirectory('${Paths.getSkinsPath()}/notes/');
+            lime.app.Application.current.window.alert("created folders", "TRACE");
             for (char in ["bf", "gf"]) {
-                for(skin in [for (e in FileSystem.readDirectory('${Paths.getSkinsPath()}$char/')) if (FileSystem.isDirectory('${Paths.getSkinsPath()}$char/$e')) e]) {
-                    var path = '${Paths.getSkinsPath()}$char/$skin/';
+                lime.app.Application.current.window.alert("char: " + Std.string(Type.typeof(char)), "TRACE");
+                var thing:Array<String> = [];
+                for (e in FileSystem.readDirectory('${Paths.getSkinsPath()}${char}/')) {
+                    lime.app.Application.current.window.alert("reading skin directory", "TRACE");
+                    if (FileSystem.isDirectory('${Paths.getSkinsPath()}${char}/${e}')) {
+                        lime.app.Application.current.window.alert("pushing skin", "TRACE");
+                        thing.push(e);
+                    }
+                }
+                lime.app.Application.current.window.alert("skins pushed", "TRACE");
+                for(skin in thing) {
+                    lime.app.Application.current.window.alert("skin: " + Std.string(Type.typeof(skin)), "TRACE");
+                    var path:String = '${Paths.getSkinsPath()}${char}/${skin}/';
+                    lime.app.Application.current.window.alert("lots of shit", "TRACE");
                     for (f in FileSystem.readDirectory(path)) {
                         var type = "TEXT";
                         if (Path.extension(f).toLowerCase() == "png") {
                             type = "IMAGE";
                         }
+                        lime.app.Application.current.window.alert("pushing", "TRACE");
                         assets.assets.push({
                             type: type,
                             id: ('assets/skins/characters/$char/$skin/$f').toLowerCase(), // for case sensitive shit & correct linux support
@@ -267,20 +284,25 @@ class ModSupport {
                 }
             }
             try {
-                getAssetFiles(assets.assets, '${Paths.getSkinsPath()}notes/', '', 'skins', 'images/', true);
+                Paths.voidMatchPath('${Paths.getSkinsPath()}notes/', function(hell:String) { getAssetFiles(assets.assets, hell, '', 'skins', 'images/', true); });
             } catch(e) {
                 trace(e.details());
             }
-
+            lime.app.Application.current.window.alert("registering lib", "TRACE");
             if (openfl.utils.Assets.hasLibrary("skins"))
                 openfl.utils.Assets.unloadLibrary("skins");
             openfl.utils.Assets.registerLibrary("skins", AssetLibrary.fromManifest(assets));
+            lime.app.Application.current.window.alert("done", "TRACE");
         }
-        var mods = getMods();
-        var newMod = false;
-        for(mod in mods)
-            if (reloadAll || modConfig[mod] == null || (reloadCurrent && mod == Settings.engineSettings.data.selectedMod))
+        lime.app.Application.current.window.alert("Starting making mods", "TRACE");
+        var mods:Array<String> = getMods();
+        var newMod:Bool = false;
+        for(mod in mods) {
+            if (reloadAll || modConfig[mod] == null || (reloadCurrent && mod == Settings.engineSettings.data.selectedMod)) {
                 newMod = loadMod(mod) || newMod;
+            }
+        }
+        lime.app.Application.current.window.alert("finished mods", "TRACE");
         Settings.engineSettings.data.lastInstalledMods = mods;
         return newMod;
     }
@@ -319,6 +341,7 @@ class ModSupport {
         }
     }
     public static function loadMod(mod:String) {
+        lime.app.Application.current.window.alert("save", "TRACE");
         try {
             var s = new FlxSave();
             s.bind('mod_${Md5.encode(mod.toLowerCase())}');
@@ -327,25 +350,22 @@ class ModSupport {
         } catch(e) {
             trace(e.details());
         }
-
         
         // imma do assets lol
-        var libName = 'mods/$mod'.toLowerCase();
+        lime.app.Application.current.window.alert("creating that ass fucking library", "TRACE");
+        var libName:String = 'mods/$mod';
         var assets:AssetManifest = new AssetManifest();
         assets.name = libName;// for case sensitive shit & correct linux support
-        assets.libraryType = null;
-        assets.version = 2;
-        assets.libraryArgs = [];
         assets.rootPath = '${Paths.modsPath}/$mod/';
-        assets.assets = [];
-        getAssetFiles(assets.assets, '${Paths.modsPath}/$mod/', '', libName);
+        Paths.voidMatchPath('${Paths.modsPath}/$mod/', function(aaaa:String) { getAssetFiles(assets.assets, aaaa, '', libName); });
+        lime.app.Application.current.window.alert("checking for outdated", "TRACE");
         checkForOutdatedAssets(assets);
-
+        lime.app.Application.current.window.alert("adding library", "TRACE");
         if (openfl.utils.Assets.hasLibrary(libName))
             openfl.utils.Assets.unloadLibrary(libName);
         openfl.utils.Assets.registerLibrary(libName, AssetLibrary.fromManifest(assets));
 
-        
+        lime.app.Application.current.window.alert("loading config.json", "TRACE");
 
         var json:ModConfig = null;
         var path = Paths.getPath('config.json', TEXT, libName);
@@ -376,8 +396,9 @@ class ModSupport {
                 gameName: ['Friday Night Funkin\'', 'YoshiCrafter', 'Engine']
             }
         };
+        lime.app.Application.current.window.alert("setting modConfig[mod] to json", "TRACE");
         modConfig[mod] = json;
-
+        lime.app.Application.current.window.alert("medals shit", "TRACE");
         if (Assets.exists(Paths.file('medals.json', TEXT, 'mods/$mod'))) {
             try {
                 modMedals[mod] = Json.parse(Assets.getText(Paths.file('medals.json', TEXT, 'mods/$mod')));
@@ -389,13 +410,16 @@ class ModSupport {
             modMedals[mod] = {medals: []};
             File.saveContent('${Paths.modsPath}/$mod/medals.json', Json.stringify(modMedals[mod]));
         }
+        lime.app.Application.current.window.alert("medals done", "TRACE");
         if (!Settings.engineSettings.data.lastInstalledMods.contains(mod)) {
             trace("NEW MOD INSTALLED: " + mod);
             if (Settings.engineSettings.data.autoSwitchToLastInstalledMod) {
                 Settings.engineSettings.data.selectedMod = mod;
+                lime.app.Application.current.window.alert("is working", "TRACE");
                 return true;
             }
         }
+        lime.app.Application.current.window.alert("is working", "TRACE");
         return false;
     }
     #if windows
@@ -406,9 +430,9 @@ class ModSupport {
     public static function getExpressionFromPath(path:String, critical:Bool = false):hscript.Expr {
         var ast:Expr = null;
         try {
-			var cachePath = path.toLowerCase();
+			var cachePath = path;
 			var fileData = FileSystem.stat(path);
-            var content = sys.io.File.getContent(path);
+            var content = sys.io.File.getContent(Paths.gameFilesPath() + path);
             ast = getExpressionFromString(content, critical, path);
         } catch(ex) {
             if (!openfl.Lib.application.window.fullscreen && critical) openfl.Lib.application.window.alert('Could not read the file at "$path".');
@@ -470,7 +494,7 @@ class ModSupport {
         }
         return name;
     }
-    public static function setScriptDefaultVars(script:Script, mod:String, settings:Dynamic) {
+    public static function setScriptDefaultVars(script:Script, mod:String, settings:Any) {
         var superVar = {};
         if (Std.isOfType(script, HScript)) {
             var hscript:HScript = cast script;
@@ -626,7 +650,7 @@ class ModSupport {
             var freeplayList:String = "";
             #if sys
                 try {
-                    freeplayList = sys.io.File.getContent(Paths.modsPath + "/" + mod + "/data/freeplaySonglist.txt");
+                    freeplayList = Paths.getMatchPath(Paths.modsPath + "/" + mod + "/data/freeplaySonglist.txt", function(hell:String) { return sys.io.File.getContent(hell); });
                 } catch(e) {
                     freeplayList = "";
                 }

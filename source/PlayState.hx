@@ -185,8 +185,13 @@ class PlayState extends MusicBeatState
 	public var currentBoyfriend:Int = 0;
 
 	public var gf:Character;
+        #if desktop
 	@:isVar public var dad(get, set):Character;
 	@:isVar public var boyfriend(get, set):Boyfriend;
+        #else
+        @:isVar public var dad:Character;
+        @:isVar public var boyfriend:Boyfriend;
+        #end
 
 	dynamic function get_boyfriend():Boyfriend
 	{
@@ -385,7 +390,7 @@ class PlayState extends MusicBeatState
 	public var numberOfNotes:Float = 0;
 	public var numberOfArrowNotes:Float = 0;
 	public var misses:Int = 0;
-	public var accuracy_(get, null):Float;
+	public var accuracy_:Float;
 
 	dynamic function get_accuracy_():Float
 	{
@@ -796,11 +801,13 @@ class PlayState extends MusicBeatState
 
 		FlxG.scaleMode = new WideScreenScale();
 
-		if (FlxG.sound.music != null)
+		if (FlxG.sound.music != null) {
 			FlxG.sound.music.stop();
+                }
 
-		if (_SONG == null)
+		if (_SONG == null) {
 			_SONG = Song.loadModFromJson('tutorial', 'Friday Night Funkin\'');
+                }
 
 		curSong = _SONG.song;
 		
@@ -828,29 +835,19 @@ class PlayState extends MusicBeatState
 		{
 			end_cutscene = new DummyScript();
 		}
-		if (cutscene == null)
+		if (cutscene == null) {
 			cutscene = new DummyScript();
-		if (end_cutscene == null)
+                }
+		if (end_cutscene == null) {
 			end_cutscene = new DummyScript();
+                }
 
-		scripts.setVariable("update", function(elapsed:Float)
-		{
-		});
-		scripts.setVariable("create", function()
-		{
-		});
-		scripts.setVariable("newPost", function()
-		{
-		});
-		scripts.setVariable("musicstart", function()
-		{
-		});
-		scripts.setVariable("beatHit", function(curBeat:Int)
-		{
-		});
-		scripts.setVariable("stepHit", function(curStep:Int)
-		{
-		});
+		scripts.setVariable("update", function(elapsed:Float){});
+		scripts.setVariable("create", function(){});
+		scripts.setVariable("newPost", function(){});
+		scripts.setVariable("musicstart", function(){});
+		scripts.setVariable("beatHit", function(curBeat:Int){});
+		scripts.setVariable("stepHit", function(curStep:Int){});
 		scripts.setVariable("botplay", engineSettings.botplay);
 		scripts.setVariable("gfVersion", _SONG.gfVersion);
 
@@ -896,8 +893,7 @@ class PlayState extends MusicBeatState
 			}
 		];
 		scripts.setVariable("ratings", defaultRatings);
-		scripts.setVariable("getCameraZoom", function(curBeat)
-		{
+		scripts.setVariable("getCameraZoom", function(curBeat) {
 			if (curBeat % 4 == 0)
 			{
 				return {
@@ -914,9 +910,7 @@ class PlayState extends MusicBeatState
 			}
 		});
 
-		var endCutsceneFunc = function()
-		{
-		};
+		var endCutsceneFunc = function(){};
 
 		for (c in [cutscene, end_cutscene])
 		{
@@ -941,8 +935,7 @@ class PlayState extends MusicBeatState
 		ModSupport.setScriptDefaultVars(cutscene, ModSupport.song_cutscene == null ? songMod : ModSupport.song_cutscene.mod, {});
 		ModSupport.setScriptDefaultVars(end_cutscene, ModSupport.song_end_cutscene == null ? songMod : ModSupport.song_end_cutscene.mod, {});
 
-		for (s in scripts.scripts)
-		{
+		for (s in scripts.scripts) {
 			s.setScriptObject(this);
 		}
 
@@ -984,8 +977,9 @@ class PlayState extends MusicBeatState
 		
 		
 
-		if (engineSettings.botplay || !SONG.validScore || PlayState.fromCharter)
+		if (engineSettings.botplay || !SONG.validScore || PlayState.fromCharter) {
 			validScore = false;
+                }
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 
@@ -1027,8 +1021,10 @@ class PlayState extends MusicBeatState
 				case 'mom-car':
 					iconRPC = 'mom';
 			}
+                        #end
 		}
 
+                #if desktop
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		if (isStoryMode)
 		{
@@ -1332,10 +1328,11 @@ class PlayState extends MusicBeatState
 		timerBar.antialiasing = true;
 
 		var color:FlxColor;
-		if (dad != null)
+		if (dad != null) {
 			timerBar.createGradientBar([0xFF222222], [color = dad.getColors()[0], FlxColor.subtract(color, 0x00333333)], 1, 90);
-		else
+		} else {
 			timerBar.createGradientBar([0xFF222222], [0xFF7163F1, 0xFFD15CF8], 1, 90);
+                }
 		timerBar.visible = false;
 		
 
@@ -1370,8 +1367,9 @@ class PlayState extends MusicBeatState
 			add(timerNow);
 			add(timerFinal);
 		}
-		if (members.contains(msScoreLabel))
+		if (members.contains(msScoreLabel)) {
 			remove(msScoreLabel);
+                }
 		add(msScoreLabel);
 
 		strumLineNotes.cameras = [camHUD];
@@ -1381,22 +1379,11 @@ class PlayState extends MusicBeatState
 		startingSong = true;
 
 		songAltName = SONG.song;
-		#if MOBILE_UI
-		var pauseButton = new FlxClickableSprite(guiSize.x - 15, 15);
-		pauseButton.frames = Paths.getSparrowAtlas("ui_buttons", "preload");
-		pauseButton.animation.addByPrefix("pause", "pause button");
-		pauseButton.animation.play("pause");
-		pauseButton.key = FlxKey.ENTER;
-		pauseButton.setHitbox();
-		pauseButton.x -= pauseButton.hitbox.x;
-		pauseButton.cameras = [camHUD];
-		pauseButton.antialiasing = true;
-		add(pauseButton);
-		#end
 
 		// https://discord.com/channels/860561967383445535/925492025258836059/941454799600242759
-		if (Std.isOfType(FlxG.scaleMode, WideScreenScale))
+		if (Std.isOfType(FlxG.scaleMode, WideScreenScale)) {
 			WideScreenScale.updatePlayStateHUD();
+                }
 	}
 
 	public override function createPost() {
@@ -2431,15 +2418,14 @@ class PlayState extends MusicBeatState
 				{
 					DiscordClient.changePresence(detailsText, '$songMod - ${CoolUtil.prettySong(song.song)} ($storyDifficultyText)', iconRPC);
 				}
-				}
 				#end
-			}
-
-			super.closeSubState();
+                        }
 		}
 
-		override
-		public function onFocus():Void
+			super.closeSubState();
+	}
+
+        override public function onFocus():Void
 		{
 			scripts.executeFunc("onFocus", []);
 			#if desktop
@@ -2574,9 +2560,9 @@ class PlayState extends MusicBeatState
 				else
 					scoreTxt.text = ScoreText.generate(this);
 			}
-
+                        #if desktop
 			updateDiscordRPC();
-
+                        #end
 			if (hitCounter != null && hitCounter.visible)
 			{
 				var hitsText = "";
@@ -3073,7 +3059,7 @@ class PlayState extends MusicBeatState
 				scripts.executeFunc("updatePost", [elapsed]);
 			}
 		}
-
+                #if desktop
 		public function updateDiscordRPC(?elapsed:Float) {
 			if (elapsed == null) elapsed = FlxG.elapsed;
 			discordTimer += elapsed;
@@ -3096,7 +3082,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-
+                #end
 		public function doGameOver() {
 			scripts.executeFunc("onPreDeath");
 			blueballAmount++;

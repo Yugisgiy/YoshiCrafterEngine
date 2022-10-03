@@ -57,13 +57,13 @@ class Script implements IFlxDestroyable {
     }
 
     public static function create(path:String):Script {
-        var p = path.toLowerCase();
+        var p = path;
         var ext = Path.extension(p);
 
         var scriptExts = Main.supportedFileTypes;
         if (ext.trim() == "") {
             for (e in scriptExts) {
-                if (FileSystem.exists('$p.$e')) {
+                if (Paths.matchPath('$p.$e', function(hell:String) { return FileSystem.exists(hell); })) {
                     p = '$p.$e';
                     ext = e;
                     break;
@@ -300,7 +300,7 @@ class HScript extends Script {
         super.loadFile();
         if (filePath == null || filePath.trim() == "") return;
         try {
-            hscript.execute(ModSupport.getExpressionFromPath(filePath, true));
+            Paths.voidMatchPath(filePath, function(hell:String) { hscript.execute(ModSupport.getExpressionFromPath(hell, true)); });
         } catch(e) {
             this.trace('${e.message}', true);
         }
@@ -346,7 +346,7 @@ class HardcodedHScript extends HScript {
         var expr = null;
         var unserializer = null;
         try {
-            code = sys.io.File.getContent(filePath);
+            code = Paths.getMatchPath(Paths.gameFilesPath() + filePath, function(hell:String) { return sys.io.File.getContent(hell); });
             // {code: expr}
             unserializer = new Unserializer(code);
             expr = unserializer.unserialize();
@@ -1063,8 +1063,8 @@ class LuaScript extends Script {
         var oldExec = currentExecutingScript;
         currentExecutingScript = this;
         
-        if (FileSystem.exists(filePath)) {
-            if (LuaL.dostring(state, File.getContent(filePath)) != 0) {
+        if (Paths.matchPath(Paths.gameFilesPath() + filePath, function(hell:String) { return FileSystem.exists(hell); })) {
+            if (LuaL.dostring(state, Paths.getMatchPath(Paths.gameFilesPath() + filePath, function(hell:String) { return File.getContent(hell); })) != 0) {
                 var err = Lua.tostring(state, -1);
                 this.trace('$err');
             }

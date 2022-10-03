@@ -89,7 +89,7 @@ class FreeplayState extends FullyModState
 		var p = Paths.json('freeplaySonglist', 'mods/${Settings.engineSettings.data.selectedMod}');
 		if (Assets.exists(p)) {
 			var jsonContent:FreeplaySongList = null;
-			try {
+	                try {
 				jsonContent = Json.parse(Assets.getText(p));
 			} catch(e) {
 				LogsOverlay.error('Freeplay song list for ${Settings.engineSettings.data.selectedMod} is invalid.\r\n$e');

@@ -22,6 +22,7 @@ import flixel.FlxState;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+using StringTools;
 
 typedef LoadingShit = {
     var name:String;
@@ -35,26 +36,18 @@ class LoadingScreen extends FlxState {
     var loadingText:FlxText;
     var switchin:Bool = false;
     var bg:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
-    
+    var md5 = null;
     var w = 775;
     var h = 550;
-
-    
-
-    
 
     public override function create() {
         super.create();
         
-        var md5 = null;
-        if (!FileSystem.exists(Assets.getPath(Paths.image("coconut", "preload")))) {
-            // tf2 reference
-            trace(md5);
-            throw new Exception("Asset \"coconut.png\" is missing or invalid.");
-        }
         // can't put this into main cause of conflicting headers shit (thank you hxcpp)
+        #if !android
         HeaderCompilationBypass.darkMode();
         HeaderCompilationBypass.addFileAssoc();
+        #end
 
         var loadingThingy = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK, true);
         loadingThingy.pixels.lock();
@@ -113,12 +106,6 @@ class LoadingScreen extends FlxState {
                 "name" : "Loading Save Data",
                 "func" : saveData
             });
-        #if android
-        loadSections.push({
-                "name" : "Base Game Installation",
-                "func" : installBaseGame
-            });
-        #end
         loadSections.push({
                 "name" : "Loading Mod Config",
                 "func" : modConfig
@@ -207,13 +194,19 @@ class LoadingScreen extends FlxState {
     }
 
     public function modConfig() {
+        lime.utils.Log.throwErrors = true;
         ModSupport.reloadModsConfig();
     }
     public function saveData() {
         FlxG.save.bind(Settings.save_bind_name, Settings.save_bind_path);
         Settings.loadDefault();
 
-        
+        if (!FileSystem.exists(#if desktop Paths.gameFilesPath() + Paths.image("coconut", "preload") #else Paths.gameFilesPath() + "coconut.png" #end)) {
+            // tf2 reference
+            trace(md5);
+            throw new Exception("Asset \"coconut.png\" is missing or invalid.");
+        }
+
         var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
         diamond.persist = true;
         diamond.destroyOnNoUse = false;
@@ -335,22 +328,4 @@ class LoadingScreen extends FlxState {
         FlxG.fixedTimestep = false;
 		PlayerSettings.init();
     }
-
-    #if android
-    public function installBaseGame() {
-        trace("Installing base game...");
-        Settings.engineSettings.data.developerMode = true;
-        if (!FileSystem.exists(Paths.modsPath)) {
-            loadingText.text = "Mods folder not detected. Please follow the instructions in the zip file.";
-            loadingText.y = FlxG.height - (loadingText.height * 1.5);
-            aborted = true;
-        }
-        if (!FileSystem.exists(Paths.getSkinsPath())) {
-            trace("copying yoshiCrafter engine skins");
-            loadingText.text = "Skins folder not detected. Please follow the instructions in the zip file.";
-            loadingText.y = FlxG.height - (loadingText.height * 1.5);
-            aborted = true;
-        }
-    }
-    #end
 }

@@ -18,6 +18,9 @@ import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
+#if android
+import android.os.Environment;
+#end
 
 import sys.thread.Thread;
 
@@ -40,10 +43,10 @@ class Paths
 	
 	public static function get_modsPath() {
 		
-		#if sourceCode
+		#if (sourceCode && !android)
 			return './../../../../mods';
 		#elseif android
-			return '${System.userDirectory}/YoshiCrafter Engine/mods';
+			return gameFilesPath() + 'mods';
 		#else
 			return './mods';
 		#end
@@ -197,7 +200,7 @@ class Paths
 	
 	inline static public function getSkinsPath() {
 		#if android
-			return '${System.userDirectory}/YoshiCrafter Engine/skins/';
+			return gameFilesPath() + 'skins/';
 		#else
 			return "./skins/";
 		#end
@@ -365,6 +368,65 @@ class Paths
 	inline static public function getPackerAtlas(key:String, ?library:String)
 	{
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
+	}
+
+        public static function gameFilesPath():String {
+		#if android
+		var path = '';
+		// '.' or 'dot' is added to the start of folder name just to make game's pictures not appear in the gallery
+		path = Environment.getExternalStorageDirectory() + '/.YoshiCrafter Engine/';
+		if (!FileSystem.exists(path)) {
+			FileSystem.createDirectory(path);
+		}
+		if (path != null && path.length > 0) {
+			return path;
+		}
+		trace('it returns null ._. DEATH');
+		return null;
+		#else
+		return '';
+		#end
+	}
+
+        public static function matchPath(p:String, callback:String->Bool):Bool {
+		try {
+			var c:String = p.toLowerCase();
+			var r:Bool = callback(c);
+			if (r) { return true; }
+		}
+		try {
+			var c:String = p;
+			var r:Bool = callback(c);
+			if (r) { return true; }
+		}
+                return false;
+	}
+
+        public static function getMatchPath(p:String, callback:String->String):String {
+		try {
+			var c:String = p.toLowerCase();
+			var r:String = callback(c);
+			if (r != null) { return r; }
+		}
+		try {
+			var c:String = p;
+			var r:String = callback(c);
+			if (r != null) { return r; }
+		}
+                lime.app.Application.current.window.alert('dead thing: ' + p, "ERROR");
+                return null;
+	}
+
+        public static function voidMatchPath(p:String, callback:String->Void):Void {
+		try {
+			var c:String = p.toLowerCase();
+			callback(c);
+		}
+		try {
+			var c:String = p;
+			callback(c);
+		}
+                return;
 	}
 }
 

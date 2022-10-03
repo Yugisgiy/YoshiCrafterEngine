@@ -1,7 +1,9 @@
 package;
 
 import mod_support_stuff.InstallModScreen;
+#if desktop
 import logging.LogsOverlay;
+#end
 import openfl.events.KeyboardEvent;
 import openfl.ui.Keyboard;
 import WindowsAPI.ConsoleColor;
@@ -19,6 +21,11 @@ import flixel.FlxState;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.Event;
+import flixel.addons.ui.FlxUIButton;
+import flixel.text.FlxText;
+#if android
+import android.Permissions;
+#end
 
 using StringTools;
 
@@ -30,16 +37,16 @@ class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
+	public static var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 120; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 
-	public static var baseTrace = haxe.Log.trace;
-
+	public static var baseTrace:Any;
+        #if desktop
 	public static var logsOverlay:LogsOverlay;
-
+        #end
 	public static function readLine(buff:Input, l:Int):String {
 		var line:Int = 0;
 		var fuck = 0;
@@ -73,7 +80,9 @@ class Main extends Sprite
 			} catch(e) {
 				return Math.pow(2, 32);
 			}
-		#else 
+		#elseif linuxSystems
+                        return LinuxAPI.getRAMonLinuxSystems();
+                #else
 			return Math.pow(2, 32); // 4gb
 		#end
 	}
@@ -114,11 +123,16 @@ class Main extends Sprite
 				var a:Array<Dynamic> = d;
 				var strs = [for(e in a) Std.string(e)];
 				for(e in strs) {
+                                        #if desktop
 					(Style == LogStyle.ERROR ? LogsOverlay.error : LogsOverlay.trace)('$prefix $e', color);
+                                        #else
+                                        lime.app.Application.current.window.alert('$prefix $e', Style == LogStyle.ERROR ? "ERROR" : "TRACE");
+                                        #end
 				}
 			}
 		};
 		
+                #if desktop
 		var args = [for (arg in Sys.args()) if (arg.startsWith("/")) '-${arg.substr(1)}' else arg];
 		
 		if (!parseArgs(args)) {
@@ -127,6 +141,7 @@ class Main extends Sprite
 		}
 
 		// UPDATE PROCESS
+                // (sirox) probably port this later, but i think is impossible :/
 		if (args.contains('update')) {
 			var copyFolder:String->String->Void = null;
 			copyFolder = function(path, destPath) {
@@ -159,6 +174,7 @@ class Main extends Sprite
 		try {
 			if (FileSystem.exists("YoshiEngine.exe")) FileSystem.deleteFile('YoshiEngine.exe');
 		} catch(e) {}
+                #end
 
 		#if cpp
 		trace("main");
@@ -169,6 +185,7 @@ class Main extends Sprite
 	}
 
 	public static function fixWorkingDirectory() {
+                #if desktop
 		var curDir = Sys.getCwd();
 		var execPath = Sys.programPath();
 		var p = execPath.replace("\\", "/").split("/");
@@ -176,8 +193,11 @@ class Main extends Sprite
 		Sys.setCwd(p.join("\\") + "\\");
 
 		HeaderCompilationBypass.enableVisualStyles();
+                #end
+                // on android we use different thing that is always fine and no need in fixing
 	}
-
+        #if desktop
+        // there's no console on android but need to make a button for installing mod
 	public static final commandPromptArgs:Array<String> = [
 		"",
 		"YoshiCrafter Engine - Command Prompt arguments",
@@ -211,6 +231,7 @@ class Main extends Sprite
 		}
 		return true;
 	}
+        #end
 
 	public function new()
 	{
@@ -232,6 +253,8 @@ class Main extends Sprite
 
 	private function init(?E:Event):Void
 	{
+                #if desktop
+                baseTrace = haxe.Log.trace;
 		stage.window.onDropFile.add(function(path:String) {
 			if (Std.isOfType(FlxG.state, MusicBeatState)) {
 				var checkSubstate:FlxState->Void = function(state) {
@@ -249,6 +272,8 @@ class Main extends Sprite
 				checkSubstate(state);
 			}
 		});
+                #end
+                // i guess this won't work with android
 		if (hasEventListener(Event.ADDED_TO_STAGE)) removeEventListener(Event.ADDED_TO_STAGE, init);
 
 		setupGame();
@@ -291,18 +316,19 @@ class Main extends Sprite
 		#if lua_test
 		initialState = LuaTest;
 		#end
-		#if android_input_test
-		initialState = AndroidInputTest;
-		#end
 
 		addChild(new FnfGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 
 		
 		fps = new GameStats(10, 3, 0xFFFFFF);
 
+                #if desktop
 		logsOverlay = new LogsOverlay();
+                #end
 
 		addChild(fps);
+		#if desktop
 		addChild(logsOverlay);
+		#end
 	}
 }
