@@ -4,9 +4,9 @@ import flixel.FlxSprite;
 
 class MP4Video {
     public static function playMP4(path:String, callback:Void->Void, repeat:Bool = false, ?canvasWidth:Int, ?canvasHeight:Int, fillScreen:Bool = false):FlxSprite {
-        
-		#if X64_BITS
-            #if windows
+        // vlc works even in 32 bits on android for some reason
+	#if (X64_BITS || android)
+            #if (windows || android)
             var video = new MP4Handler();
             video.finishCallback = callback;
             video.canvasWidth = canvasWidth;
