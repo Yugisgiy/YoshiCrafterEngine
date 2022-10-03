@@ -1,6 +1,10 @@
 package lime.utils;
 
 import haxe.PosInfos;
+import sys.FileSystem;
+import sys.io.File;
+import lime.app.Application;
+using StringTools;
 
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
@@ -32,6 +36,23 @@ class Log
 
 			if (throwErrors)
 			{
+                                #if desktop
+                                LogsOverlay.error(message);
+                                #else
+                                lime.app.Application.current.window.alert(message, "ERROR");
+                                #end
+				    var lmao:String = Paths.gameFilesPath();
+					if (!FileSystem.exists(lmao + 'logs')) {
+						FileSystem.createDirectory(lmao + 'logs');
+					}
+				    File.saveContent(lmao
+					+ 'logs/'
+					+ Application.current.meta.get('file')
+					+ '-'
+					+ Date.now().toString().replace(' ', '-').replace(':', "'")
+					+ '.log',
+					message
+					+ '\n');
 				throw message;
 			}
 			else
@@ -41,7 +62,23 @@ class Log
 				#else
 				println(message);
 				#end
-                LogsOverlay.error(message);
+                                #if desktop
+                                LogsOverlay.error(message);
+                                #else
+                                lime.app.Application.current.window.alert(message, "ERROR");
+                                #end
+                                var lmao:String = Paths.gameFilesPath();
+					if (!FileSystem.exists(lmao + 'logs')) {
+						FileSystem.createDirectory(lmao + 'logs');
+					}
+				    File.saveContent(lmao
+					+ 'logs/'
+					+ Application.current.meta.get('file')
+					+ '-'
+					+ Date.now().toString().replace(' ', '-').replace(':', "'")
+					+ '.log',
+					message
+					+ '\n');
 			}
 		}
 	}
