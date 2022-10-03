@@ -49,6 +49,7 @@ jobs:
           haxelib install hxcpp > /dev/null
           haxelib git lime https://github.com/openfl/lime
           haxelib install openfl
+          haxelib install format
           haxelib git flixel-yc29 https://github.com/yoshicrafter29/flixel
           haxelib run lime setup
           haxelib install hxp
