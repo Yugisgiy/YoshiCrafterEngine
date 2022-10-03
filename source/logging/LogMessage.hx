@@ -1,3 +1,5 @@
+#if desktop
+// THIS SHOULDN'T EXIST ON ANDROID
 package logging;
 
 import openfl.text.TextFormat;
@@ -106,3 +108,4 @@ class LogMessage extends Sprite {
         graphics.endFill();
     }
 }
+#end

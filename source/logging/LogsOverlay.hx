@@ -33,12 +33,18 @@ class LogsOverlay extends Sprite {
     public static var oldLogsText:String = "";
     public static var lastCommands:Array<String> = [];
 
-	public static var messages:Array<LogMessage> = [];
+    #if !android
+    public static var messages:Array<LogMessage> = [];
+    #end
 
     public var wheel:Float = 0;
 
     public static function error(thing:Dynamic, color:ConsoleColor = RED) {
+        #if desktop
         LogsOverlay.trace(thing, color);
+        #else
+        lime.app.Application.current.window.alert(Std.string(thing), "ERROR");
+        #end
         errors++;
     }
 	public static function trace(thing2:Dynamic, color:ConsoleColor = WHITE) {
@@ -48,6 +54,9 @@ class LogsOverlay extends Sprite {
         } else {
             thing = Std.string(thing2);
         }
+        #if android
+        lime.app.Application.current.window.alert(Std.string(thing), "ERROR");
+        #else
         if (consoleOpened && consoleVisible) {
             // logsText.text = "Logs are redirected in detached console.\nPress F8 to reattach the logs to the game.";
 
@@ -73,7 +82,9 @@ class LogsOverlay extends Sprite {
                 logsText.removeChild(messages.shift());
             tracedShit++;
         }
+        #end
 	}
+#if desktop
     public function new() {
         super();
         x = 0;
@@ -250,4 +261,10 @@ class LogsOverlay extends Sprite {
             lime.app.Application.current.window.width, messagesDisplayHeight);
         wheel = 0;
     }
+#else
+    public function new() {
+        // it shouldn't be on android
+        super();
+    }
+#end
 }
