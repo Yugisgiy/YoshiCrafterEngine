@@ -47,7 +47,7 @@ jobs:
         run: |
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null
-          haxelib git lime https://github.com/openfl/lime
+          haxelib install lime 
           haxelib install openfl
           haxelib install hxp
           haxelib install format
@@ -67,9 +67,6 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT ${{ steps.setup-ndk.outputs.ndk-path }}
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
-          haxelib set lime git
-          haxelib set flixel-yc29 git
-          haxelib remove lime 8.0.0
           haxelib list
 
       - name: Create Version Tag
