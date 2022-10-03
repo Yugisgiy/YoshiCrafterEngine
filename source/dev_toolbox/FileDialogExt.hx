@@ -45,5 +45,6 @@ class FileDialogExt extends FileDialog {
 
         return true;
         #end
+        return false;
     }
 }
