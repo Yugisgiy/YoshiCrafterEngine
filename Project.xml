@@ -41,7 +41,7 @@
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false"/>
 
 	<!--Mobile-specific-->
-	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" allow-shaders="true" require-shaders="true"/>
+	<window if="mobile" orientation="landscape" fullscreen="true" width="1280" height="720" resizable="false" allow-shaders="true" require-shaders="true"/>
 
 	<!--Switch-specific-->
 	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="true" />
@@ -52,6 +52,8 @@
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 
 	<classpath name="source" />
+
+        <define name="linuxSystems" if="linux || android"/>
 
 	<assets path="assets/preload" rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/preload" rename="assets" exclude="*.mp3" unless="web"/>
@@ -74,6 +76,7 @@
 	<!-- Videos will only work on Windows builds, sorry Android and Linux users -->
 	<assets path="plugins/" rename='' if="windows"/>
 	<assets path="dlls/" rename='' if="windows"/>
+        <!-- (sirox) IT WORKS ON ANDROID -->
 	
 	<assets path='mods' library="mods" embed='false' unless="mobile"/>
 	<assets path='skins' rename='skins' embed='false' unless="mobile"/>
@@ -107,6 +110,7 @@
 	<haxedef name="enable_updates"/>
 	<haxelib name="hxp"/>
 	<haxelib name="flixel-textureatlas-yoshiengine"/>
+        <haxelib name="extension-androidtools" if="android"/>
 
 	<!--In case you want to use nape with flixel-->
 	<!--<haxelib name="nape-haxe4" />-->
@@ -169,12 +173,11 @@
 	<android permission="android.permission.VIBRATE"/>
 	<android permission="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<android permission="android.permission.READ_EXTERNAL_STORAGE"/>
-	<haxedef name="MOBILE_UI" if="android"/>
 	
 	<haxeflag name="-dce" value="no" />
 	<haxeflag name="-xml" value="yoshicrafterengine/doc.xml" />
 
-	<!-- so that everything within flixel gets compiled which means hscript super powaaah -->
+        <!-- so that everything within flixel gets compiled which means hscript super powaaah -->
 	<haxeflag name="--macro" value="include('flixel')" />
 	<haxeflag name="--macro" value="include('sys')" />
 
