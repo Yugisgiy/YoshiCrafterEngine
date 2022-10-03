@@ -2,6 +2,7 @@ package macros;
 
 import haxe.crypto.Md5;
 import sys.io.File;
+import openfl.utils.Assets;
 
 class Coconut {
     public static macro function getCoconutMD5():haxe.macro.Expr.ExprOf<String> {

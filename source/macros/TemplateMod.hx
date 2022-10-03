@@ -8,6 +8,7 @@ import sys.FileSystem;
 class TemplateMod {
     #if macro
     public macro function zipDefaultMod() {
+        #if !android
         trace("Zipping template mod...");
         var zipWriter = ZipUtils.createZipFile("template_mod.zip");
         ZipUtils.writeFolderToZip(zipWriter, "./template_mod/", "", null, ["readme.txt"]);
@@ -18,6 +19,7 @@ class TemplateMod {
         var folder = '${Compiler.getOutput()}/../bin/assets/misc';
         FileSystem.createDirectory(folder);
         File.copy('template_mod.zip', '$folder/template_mod.zip');
+        #end
         return $v{null};
     }
     #end
