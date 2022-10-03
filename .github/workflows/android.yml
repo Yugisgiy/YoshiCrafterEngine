@@ -59,7 +59,7 @@ jobs:
           haxelib git spinehaxe https://github.com/bendmorris/spinehaxe
           haxelib git flixel-textureatlas-yoshiengine https://github.com/YoshiCrafter29/Flixel-TextureAtlas-YoshiCrafterEngine
           haxelib git hscript-yoshiengine https://github.com/YoshiCrafter29/hscript-improved
-          haxelib git flixel-yc29 https://github.com/yoshicrafter29/flixel4
+          haxelib git flixel-yc29 https://github.com/yoshicrafter29/flixel
 
       - name: Setup Lime
         run: |
