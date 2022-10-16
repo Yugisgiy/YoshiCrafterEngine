@@ -47,8 +47,8 @@ jobs:
         run: |
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null
-          haxelib install lime 
-          haxelib install openfl
+          haxelib install lime 7.9.0
+          haxelib install openfl 9.1.0
           haxelib install hxp
           haxelib install format
           haxelib run lime setup
@@ -67,6 +67,8 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT ${{ steps.setup-ndk.outputs.ndk-path }}
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
+          haxelib set lime 7.9.0
+          haxelib set openfl 9.1.0
           haxelib list
 
       - name: Create Version Tag
