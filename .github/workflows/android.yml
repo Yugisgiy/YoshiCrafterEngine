@@ -23,7 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@main
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
@@ -76,7 +76,7 @@ jobs:
       - name: Compile
         run: haxelib run lime build android -D luajit_static -release -dce no
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@main
         with:
           name: androidBuild
           path: export/release/android/bin/app/build/outputs/apk/debug
